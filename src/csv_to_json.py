@@ -21,6 +21,7 @@ parser  = argparse.ArgumentParser()
 parser.add_argument('-input_file')
 parser.add_argument('-output_dir')
 parser.add_argument('--N', default=1000000, type=int)
+parser.add_argument('--sep',default=",",type=str)
 args = parser.parse_args()
 
 N = args.N
@@ -31,11 +32,17 @@ csv_file   = open(input_file, 'r')
 output_dir = os.path.abspath(args.output_dir)
 
 #get columns in first line
-cols = csv_file.readline().split(',')
+cols = csv_file.readline().replace('\n','').split(args.sep)
 
 for i in tqdm(range(N)):
-    line = csv_file.readline().replace('\n','')
-    vals = line.split(',')
+    line = csv_file.readline()
+
+    if line == '':
+        print("done processing")
+        break
+    line = line.replace('\n','')
+
+    vals = line.split(args.sep)
     vals = [get_val(v) for v in vals]
 
     d = {}

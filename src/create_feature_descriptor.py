@@ -16,8 +16,7 @@ def is_date_func(string):
 parser = argparse.ArgumentParser()
 parser.add_argument('-input')
 parser.add_argument('-output_dir')
-# parser.add_argument('-override_file')
-parser.add_argument('-max_int_categories', type=int)
+parser.add_argument('-override_file',type=str,default="")
 
 args = parser.parse_args()
 
@@ -26,21 +25,20 @@ input_ = os.path.abspath(args.input)
 files = os.listdir(input_)
 files = [input_ + '/' + f for f in files]
 
-# override_file = os.path.abspath(args.override_file)
-# with open(override_file,'r') as f:
-#     override = json.load(f)
 
-feature_names = {}
-for f in tqdm(files):
-    with open(f,'r') as record:
-        r = json.load(record)
+override_file = os.path.abspath(args.override_file)
+with open(override_file,'r') as f:
+    override = json.load(f)
 
-        for k in r.keys(): feature_names[k] = 1
+feature_names = override['FEATURE_NAMES']
 
 features    = {}
 descriptors = {}
 
-for k in feature_names.keys():
+
+print("using features {}".format(feature_names))
+
+for k in feature_names:
     features[k] = []
     print(k)
     for f in tqdm(files):
@@ -68,6 +66,10 @@ for k in feature_names.keys():
             descriptors[k] = {"type":"number"}
     else:
         print("could not recognize feature {}".format(k))
+
+for k in override.keys():
+    if not k == "FEATURE_NAMES":
+        descriptors[k] = override[k]
 
 with open(args.output_dir+'/feature_descriptor.json','w') as f:
     json.dump(descriptors, f, indent=2, sort_keys=True)
